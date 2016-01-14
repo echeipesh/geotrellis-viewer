@@ -35,32 +35,25 @@ var MapViews = React.createClass({
   },
   handleViewClick: function(ev) {
     var layer = this.layer()
-    console.log("View", layer)
     var time = layer.times[this.state.timeIndex1]
     this.props.showLayer(`${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?time=${time}&breaks=4000,26176`)
   },
   handleNDVIClick: function (ev) {
-    console.log("NDVI", this.layer(0))
     var layer = this.layer()
-    console.log("View", layer)
     var time = layer.times[this.state.timeIndex1]
     this.props.showLayer(
       `${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?operation=ndvi&time=${time}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
     )
   },
   handleWaterClick: function (ev) {
-    console.log("Water", this.layer(0))
     var layer = this.layer()
-    console.log("View", layer)
     var time = layer.times[this.state.timeIndex1]
     this.props.showLayer(
       `${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?operation=ndwi&time=${time}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
     )
   },
   handleWaterDiffClick: function (ev) {
-    console.log("Water", this.layer(0))
     var layer = this.layer()
-    console.log("View", layer)
     var time1 = layer.times[this.state.timeIndex1]
     var time2 = layer.times[this.state.timeIndex2]
 
@@ -69,9 +62,7 @@ var MapViews = React.createClass({
     )
   },
   handleNDVIDiffClick: function (ev) {
-    console.log("NDVI", this.layer(0))
     var layer = this.layer()
-    console.log("View", layer)
     var time1 = layer.times[this.state.timeIndex1]
     var time2 = layer.times[this.state.timeIndex2]
 
@@ -81,8 +72,6 @@ var MapViews = React.createClass({
   },
 
   render: function() {
-    console.log("Layer State", this.state)
-    let layers = this.props.layers
     let layer = this.props.layers[this.state.layerIndex]
 
     let layerOptions =
@@ -96,12 +85,12 @@ var MapViews = React.createClass({
         return <option value={index} key={index}>{time}</option>
       });
 
-
     return (
       <PanelGroup defaultActiveKey="1" accordion>
         <Panel header="Landsat" eventKey="1">
           <Input type="select" label="Layer" placeholder="select" value={this.state.layerIndex}
             onChange={this.handleLayerSelect}>
+            <option disabled selected>[None]</option>
             {layerOptions}
           </Input>
 
@@ -111,14 +100,15 @@ var MapViews = React.createClass({
           </Input>
 
           <ButtonGroup>
-            <Button onClick={ev => this.handleViewClick(this.layer(0))}>View</Button>
-            <Button onClick={ev => this.handleNDVIClick(ev, this.layer(0))}>NDVI</Button>
-            <Button onClick={ev => this.handleWaterClick(ev, this.layer(0))}>Water</Button>
+            <Button onClick={this.handleViewClick}>View</Button>
+            <Button onClick={this.handleNDVIClick}>NDVI</Button>
+            <Button onClick={this.handleWaterClick}>Water</Button>
           </ButtonGroup>
         </Panel>
         <Panel header="Landsat Change Detection" eventKey="2">
           <Input type="select" label="Layer" placeholder="select" value={this.state.layerIndex}
             onChange={this.handleLayerSelect}>
+            <option disabled selected>[None]</option>
             {layerOptions}
           </Input>
           <hr/>

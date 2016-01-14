@@ -10,14 +10,13 @@ var Leaflet = React.createClass({
       minHeight: "800px", width: "100%"
     }
     let mapLayers = _.map(this.props.url, u => {
-      return <TileLayer url={u}/>
+      return <TileLayer url={u} />
     })
 
     return (
       <Map center={position} zoom={8} style={style} maxZoom={12}>
         <TileLayer
           url="http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
-          attribution='&copy; CartoDB'
         />
         {mapLayers}
       </Map>
