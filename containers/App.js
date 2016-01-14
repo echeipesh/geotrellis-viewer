@@ -21,7 +21,7 @@ var App = React.createClass({
         </div>
 
         <div className="col-md-3">
-          <Catalog />
+          <Catalog fetch={this.props.actions.fetchCatalog} />
           <MapViews
             layers={ _.filter(this.props.catalog.layers, layer => {return layer.isLandsat}) }
             showLayer={this.props.actions.showLayer} />
@@ -37,7 +37,7 @@ var mapStateToProps = function (state) {
 };
 
 var mapDispatchToProps = function (dispatch) {
-  return {
+  return { // binding actions triggers dispatch on call
     actions: bindActionCreators(actions, dispatch)
   };
 }

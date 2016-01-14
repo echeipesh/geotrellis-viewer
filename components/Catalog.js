@@ -1,43 +1,26 @@
 import React from 'react';
-import { Input } from 'react-bootstrap';
+import { Input, Button } from 'react-bootstrap';
 
+//TODO: There should be request for catalog on load
 var Catalog = React.createClass({
 
-  handleSubmit: function (e) {
-    e.preventDefault();
-    this.props.addTodo(this.state.text);
-    this.setState({
-      text: ''
-    });
-  },
-
-  handleChange: function (e) {
-    this.setState({
-      text: e.target.value
-    });
-  },
-
-  getInitialState: function () {
-    return {
-      text: ''
-    };
-  },
-
-  handleChangeCatalogUrl: function() {
-
+  handleKeyDown: function(ev) {
+    if (ev.keyCode == 13) {
+      this.props.fetch(ev.target.value)
+    }
   },
 
   render: function() {
-
+    const goButton = <Button>Go</Button>;
     return (
       <div>
         <Input type="text"
-          defaultValue="http://localhost:8000"
-          ref="url"
+          defaultValue="http://localhost:8088/catalog"
           groupClassName="group-class"
           wrapperClassName="wrapper-class"
           labelClassName="label-class"
-          onChange={self.handleChangeCatalogUrl} />
+          buttonAfter={goButton}
+          onKeyDown={this.handleKeyDown}/>
       </div>
     )
   }
