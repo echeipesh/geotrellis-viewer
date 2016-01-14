@@ -5,26 +5,10 @@ import * as actions from '../redux/actions'
 import Leaflet from '../components/Leaflet'
 import Catalog from '../components/Catalog'
 import MapViews from '../components/MapViews'
+import _ from 'lodash'
 
 import "bootstrap-webpack"
 
-function flattenLayers(layers) {
-  return _
-    .chain(layers)
-    .map( layer => {
-      return _
-        .map(layer.times, time => {
-          return {
-            name: layer.name,
-            time: time,
-            extent: layer.extent,
-            isLandsat: layer.isLandsat
-          }
-        })
-    })
-    .flatten()
-    .value()
-}
 
 var App = React.createClass({
 
@@ -39,7 +23,7 @@ var App = React.createClass({
         <div className="col-md-3">
           <Catalog />
           <MapViews
-            catalog={flattenLayers(this.props.catalog.layers)}
+            layers={ _.filter(this.props.catalog.layers, layer => {return layer.isLandsat}) }
             showLayer={this.props.actions.showLayer} />
         </div>
 
