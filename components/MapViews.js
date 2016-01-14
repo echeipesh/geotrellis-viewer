@@ -6,10 +6,18 @@ import { PanelGroup, Panel, Input, Button, ButtonGroup } from 'react-bootstrap'
 var MapViews = React.createClass({
 
   getInitialState: function () {
-    return {
-      layerIndex: null,
-      timeIndex1: null,
-      timeIndex2: null
+    if (_.isArray(this.props.layers) && this.props.layers.length > 0) {
+      return {
+        layerIndex: 0,
+        timeIndex1: 0,
+        timeIndex2: null
+      }
+    } else {
+      return {
+        layerIndex: null,
+        timeIndex1: null,
+        timeIndex2: null
+      }
     }
   },
   handleLayerSelect: function(ev) {
