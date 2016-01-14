@@ -15,7 +15,7 @@ var Catalog = React.createClass({
     return (
       <div>
         <Input type="text"
-          defaultValue="http://localhost:8088/catalog"
+          defaultValue={this.props.rootUrl}
           groupClassName="group-class"
           wrapperClassName="wrapper-class"
           labelClassName="label-class"

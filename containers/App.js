@@ -21,8 +21,11 @@ var App = React.createClass({
         </div>
 
         <div className="col-md-3">
-          <Catalog fetch={this.props.actions.fetchCatalog} />
+          <Catalog
+            rootUrl={this.props.rootUrl}
+            fetch={this.props.actions.fetchCatalog} />
           <MapViews
+            rootUrl={this.props.rootUrl}
             layers={ _.filter(this.props.catalog.layers, layer => {return layer.isLandsat}) }
             showLayer={this.props.actions.showLayer} />
         </div>

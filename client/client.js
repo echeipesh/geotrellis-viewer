@@ -4,9 +4,10 @@ import { Provider } from 'react-redux';
 import App from '../containers/App';
 
 var initialState = {
+  rootUrl: "http://localhost:8088",
+
   map: {
-    url: "http://{s}.tiles.mapbox.com/v3/azavea.map-zbompf85/{z}/{x}/{y}.png"
-    //url: "http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+    url: []
   },
 
   catalog: {
