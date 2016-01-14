@@ -5,22 +5,21 @@ import "leaflet/dist/leaflet.css"
 
 var Leaflet = React.createClass({
   render: function() {
-    const position = [51.505, -0.09];
+    const position = [35.937263, -91.164838];
     const style = {
       minHeight: "800px", width: "100%"
     }
+    let mapLayers = _.map(this.props.url, u => {
+      return <TileLayer url={u}/>
+    })
 
     return (
-      <Map center={position} zoom={13} style={style}>
+      <Map center={position} zoom={8} style={style} maxZoom={12}>
         <TileLayer
-          url={this.props.url}
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          url="http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
+          attribution='&copy; CartoDB'
         />
-        <Marker position={position}>
-          <Popup>
-            <span>A pretty CSS3 popup.<br/>Easily customizable.</span>
-          </Popup>
-        </Marker>
+        {mapLayers}
       </Map>
     )
   }

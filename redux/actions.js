@@ -32,7 +32,8 @@ var actions = {
   fetchCatalog: function (url) {
     return dispatch => {
       dispatch(actions.loadCatalogRequest(url))
-      return fetch(url)
+      console.log("FETCH CATALOG", url + "/catalog")
+      return fetch(url + "/catalog")
         .then(
           response => {
             response.json().then( json => {
@@ -42,6 +43,19 @@ var actions = {
           error => dispatch(actions.loadCatalogFailure(url, error))
         )
     }
+  },
+  showLayerWithBreaks: function(layerUrl, breaksUrl) {
+    return dispatch => {
+      return fetch(breaksUrl)
+        .then(
+          response => {
+            response.blob().then( breaks =>
+              dispatch(showLayer(layerUrl + "&breaks=" + breaks))
+            )
+          },
+          error => {}
+        )
+      }
   }
 };
 

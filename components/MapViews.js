@@ -26,22 +26,58 @@ var MapViews = React.createClass({
   handleTimeSelect: function(target, ev) {
     this.setState(Object.assign({}, this.state, {[target]: +ev.target.value}))
   },
-  handleViewClick: function(ev, layer) {
-    console.log("View", this.layer(0))
+  layer: function () {
+    if (this.state.layerIndex == null) {
+      return null
+    } else {
+      return this.props.layers[this.state.layerIndex]
+    }
   },
-  handleNDVIClick: function (ev, layer) {
+  handleViewClick: function(ev) {
+    var layer = this.layer()
+    console.log("View", layer)
+    var time = layer.times[this.state.timeIndex1]
+    this.props.showLayer(`${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?time=${time}&breaks=4000,26176`)
+  },
+  handleNDVIClick: function (ev) {
     console.log("NDVI", this.layer(0))
-    // TODO: Build TMS URL for NDVI
-    // How are the breaks going to happen? The showUrl function might need a breaks endpoint
-    // that will do breaks. Maybe I can even roll that up in a thunk.
-    this.props.showLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png")
+    var layer = this.layer()
+    console.log("View", layer)
+    var time = layer.times[this.state.timeIndex1]
+    this.props.showLayer(
+      `${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?operation=ndvi&time=${time}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
+    )
   },
-  handleWaterClick: function (ev, layer) {
+  handleWaterClick: function (ev) {
     console.log("Water", this.layer(0))
-    // TODO: Build TMS URL for Water
-    // How are the breaks going to happen? The showUrl function might need a breaks endpoint
-    // that will do breaks. Maybe I can even roll that up in a thunk.
-    this.props.showLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png")
+    var layer = this.layer()
+    console.log("View", layer)
+    var time = layer.times[this.state.timeIndex1]
+    this.props.showLayer(
+      `${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?operation=ndwi&time=${time}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
+    )
+  },
+  handleWaterDiffClick: function (ev) {
+    console.log("Water", this.layer(0))
+    var layer = this.layer()
+    console.log("View", layer)
+    var time1 = layer.times[this.state.timeIndex1]
+    var time2 = layer.times[this.state.timeIndex2]
+
+    this.props.showLayer(
+      `${this.props.rootUrl}/diff/${layer.name}/{z}/{x}/{y}?operation=ndwi&time1=${time1}&time2=${time2}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
+    )
+  },
+  handleNDVIDiffClick: function (ev) {
+    console.log("NDVI", this.layer(0))
+    var layer = this.layer()
+    console.log("View", layer)
+    var time1 = layer.times[this.state.timeIndex1]
+    var time2 = layer.times[this.state.timeIndex2]
+
+    this.props.showLayer(
+      `${this.props.rootUrl}/diff/${layer.name}/{z}/{x}/{y}?operation=ndvi&time1=${time1}&time2=${time2}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
+    )
   },
 
   render: function() {
@@ -98,8 +134,8 @@ var MapViews = React.createClass({
           </Input>
 
           <ButtonGroup>
-            <Button>NDVI Change</Button>
-            <Button>Water Change</Button>
+            <Button onClick={this.handleNDVIDiffClick}>NDVI Change</Button>
+            <Button onClick={this.handleWaterDiffClick}>Water Change</Button>
           </ButtonGroup>
         </Panel>
         <Panel header="And now the weather" evenKey="3">
