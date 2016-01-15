@@ -5,17 +5,17 @@ var Catalog = React.createClass({
   getInitialState: function () {
     return {
       url: this.props.defaultUrl
-    }
+    };
   },
   handleSubmit: function() {
-    this.props.onSubmit(this.state.url)
+    this.props.onSubmit(this.state.url);
   },
   handleOnChange: function (ev) {
-    this.setState({url: ev.target.value})
+    this.setState({url: ev.target.value});
   },
   handleKeyDown: function(ev) {
     if (ev.keyCode == 13) {
-      this.handleSubmit()
+      this.handleSubmit();
     }
   },
   render: function() {
@@ -32,7 +32,7 @@ var Catalog = React.createClass({
           onChange={this.handleOnChange}
           onKeyDown={this.handleKeyDown}/>
       </div>
-    )
+    );
   }
 });
 
