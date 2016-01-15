@@ -1,82 +1,96 @@
+"use strict";
 import React from 'react'
 import _ from 'lodash'
 import { PanelGroup, Panel, Input, Button, ButtonGroup } from 'react-bootstrap'
 
-//TODO: The layers should be flattened before they get here?
-var MapViews = React.createClass({
 
+var MapViews = React.createClass({
   getInitialState: function () {
-    if (_.isArray(this.props.layers) && this.props.layers.length > 0) {
-      return {
-        layerIndex: 0,
-        timeIndex1: 0,
-        timeIndex2: null
-      }
-    } else {
-      return {
-        layerIndex: null,
-        timeIndex1: null,
-        timeIndex2: null
-      }
+    return {
+      activePane: 1,
+      bandOp: "none",
+      diffOp: "ndvi",
+      layer: undefined, //layer index
+      time1: undefined, //time1 index in layer
+      time2: undefined, //time2 index in layer
+      times: {} // maps from layerId => {timeId1 , timeId2}
     }
+  },
+  handlePaneSelect: function(id) {
+    let newState = _.merge({}, this.state, { activePane: id })
+    this.setState(newState)
+    this.updateMap(newState)
   },
   handleLayerSelect: function(ev) {
-    this.setState(Object.assign({}, this.state, {"layerIndex": +ev.target.value}))
+    let layer = +ev.target.value
+    let newState = _.merge({}, this.state, {
+      "layer": layer,
+      "time1": _.get(this.state.times[layer], "time1", undefined),
+      "time2": _.get(this.state.times[layer], "time2", undefined)
+    })
+    this.setState(newState)
+    this.updateMap(newState)
   },
   handleTimeSelect: function(target, ev) {
-    this.setState(Object.assign({}, this.state, {[target]: +ev.target.value}))
+    let timeId = +ev.target.value
+    let newState = _.merge({}, this.state, {
+        [target]: timeId,
+        times: {
+          [this.state.layer]: {
+            [target]: timeId
+          }
+        }
+      })
+    this.setState(newState)
+    this.updateMap(newState)
   },
-  layer: function () {
-    if (this.state.layerIndex == null) {
-      return null
-    } else {
-      return this.props.layers[this.state.layerIndex]
+  handleBandOperationSelect: function(ev) {
+    let newState = _.merge({}, this.state, { bandOp: ev.target.value })
+    this.setState(newState)
+    this.updateMap(newState)
+  },
+  handleDiffOperationSelect: function(ev) {
+    let newState = _.merge({}, this.state, { diffOp: ev.target.value })
+    this.setState(newState)
+    this.updateMap(newState)
+  },
+  selection: function (state) {
+    var layer, time1, time2
+    if (state.layer != undefined) {
+      layer = this.props.layers[state.layer]
+      time1 = layer.times[state.time1]
+      time2 = layer.times[state.time2]
     }
-  },
-  handleViewClick: function(ev) {
-    var layer = this.layer()
-    var time = layer.times[this.state.timeIndex1]
-    this.props.showLayer(`${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?time=${time}&breaks=4000,26176`)
-  },
-  handleNDVIClick: function (ev) {
-    var layer = this.layer()
-    var time = layer.times[this.state.timeIndex1]
-    this.props.showLayer(
-      `${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?operation=ndvi&time=${time}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
-    )
-  },
-  handleWaterClick: function (ev) {
-    var layer = this.layer()
-    var time = layer.times[this.state.timeIndex1]
-    this.props.showLayer(
-      `${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?operation=ndwi&time=${time}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
-    )
-  },
-  handleWaterDiffClick: function (ev) {
-    var layer = this.layer()
-    var time1 = layer.times[this.state.timeIndex1]
-    var time2 = layer.times[this.state.timeIndex2]
 
-    this.props.showLayer(
-      `${this.props.rootUrl}/diff/${layer.name}/{z}/{x}/{y}?operation=ndwi&time1=${time1}&time2=${time2}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
-    )
+    return [layer, time1, time2]
   },
-  handleNDVIDiffClick: function (ev) {
-    var layer = this.layer()
-    var time1 = layer.times[this.state.timeIndex1]
-    var time2 = layer.times[this.state.timeIndex2]
+  updateMap: function (state) {
+    let [layer, time1, time2] = this.selection(state)
 
-    this.props.showLayer(
-      `${this.props.rootUrl}/diff/${layer.name}/{z}/{x}/{y}?operation=ndvi&time1=${time1}&time2=${time2}&breaks=78,108,128,143,155,169,186,206,227,243,256,272,288,311,5346`
-    )
+    // Single Band Calculation
+    if (state.activePane == 1 && ! _.isEmpty(layer) && ! _.isEmpty(time1) ) {
+      let op = (state.bandOp != "none") ?  `&operation=${state.bandOp}` : ""
+      this.props.showLayerWithBreaks(
+        `${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?time=${time1}${op}`,
+        `${this.props.rootUrl}/tiles/breaks/${layer.name}?time=${time1}${op}`
+      )
+
+    // Difference Calculation
+    } else if (state.activePane == 2 && ! _.isEmpty(layer) && ! _.isEmpty(time1) && ! _.isEmpty(time2) ) {
+      let op = (state.diffOp != "none") ?  `&operation=${state.diffOp}` : ""
+      this.props.showLayerWithBreaks(
+        `${this.props.rootUrl}/diff/${layer.name}/{z}/{x}/{y}?time1=${time1}&time2=${time2}${op}`,
+        `${this.props.rootUrl}/diff/breaks/${layer.name}?time1=${time1}&time2=${time2}${op}`
+      )
+    }
   },
 
   render: function() {
-    let layer = this.props.layers[this.state.layerIndex]
+    let [layer, time1, time2] = this.selection(this.state)
+    let isLandsat = _.get(layer, "isLandsat", false)
 
     let layerOptions =
       _.map(this.props.layers, (layer, index) => {
-        let selected = (index == this.state.layerIndex)
         return <option value={index} key={index}>{layer.name}</option>
       });
 
@@ -85,53 +99,48 @@ var MapViews = React.createClass({
         return <option value={index} key={index}>{time}</option>
       });
 
-    return (
-      <PanelGroup defaultActiveKey="1" accordion>
-        <Panel header="Landsat" eventKey="1">
-          <Input type="select" label="Layer" placeholder="select" value={this.state.layerIndex}
-            onChange={this.handleLayerSelect}>
-            <option disabled selected>[None]</option>
-            {layerOptions}
-          </Input>
-
-          <Input type="select" label="Time" placeholder="select" value={this.state.timeIndex1}
-            onChange={ev => this.handleTimeSelect("timeIndex1", ev)}>
+    return (<div>
+      <Panel header={<h3>Layer</h3>}>
+        <Input type="select" placeholder="select" value={this.state.layerIndex}
+          onChange={this.handleLayerSelect}>
+          <option disabled>[None]</option>
+          {layerOptions}
+        </Input>
+      </Panel>
+      <PanelGroup defaultActiveKey="1" accordion onSelect={this.handlePaneSelect}>
+        <Panel header="Single Layer" eventKey="1">
+          <Input type="select" label="Time" placeholder="select" value={this.state.time1}
+            onChange={ev => this.handleTimeSelect("time1", ev)}>
+            <option disabled>[None]</option>
             {layerTimes}
           </Input>
-
-          <ButtonGroup>
-            <Button onClick={this.handleViewClick}>View</Button>
-            <Button onClick={this.handleNDVIClick}>NDVI</Button>
-            <Button onClick={this.handleWaterClick}>Water</Button>
-          </ButtonGroup>
+          <form>
+            <Input type="radio" onChange={this.handleBandOperationSelect} name="calc" value="none" label="View" defaultChecked />
+            <Input type="radio" onChange={this.handleBandOperationSelect} name="calc" value="ndvi" label="NDVI" />
+            <Input type="radio" onChange={this.handleBandOperationSelect} name="calc" value="ndwi" label="NDWI" />
+          </form>
         </Panel>
-        <Panel header="Landsat Change Detection" eventKey="2">
-          <Input type="select" label="Layer" placeholder="select" value={this.state.layerIndex}
-            onChange={this.handleLayerSelect}>
-            <option disabled selected>[None]</option>
-            {layerOptions}
-          </Input>
-          <hr/>
-
-          <Input type="select" label="Time 1" placeholder="select" value={this.state.timeIndex1}
-            onChange={ev => this.handleTimeSelect("timeIndex1", ev)}>
+        <Panel header="Layer Change Detection" eventKey="2">
+          <Input type="select" label="Time 1" placeholder="select" value={this.state.time1}
+            onChange={ev => this.handleTimeSelect("time1", ev)}>
+            <option disabled>[None]</option>
             {layerTimes}
           </Input>
 
-          <Input type="select" label="Time 2" placeholder="select" value={this.state.timeIndex2}
-            onChange={ev => this.handleTimeSelect("timeIndex2", ev)}>
+          <Input type="select" label="Time 2" placeholder="select" value={this.state.time2}
+            onChange={ev => this.handleTimeSelect("time2", ev)}>
+            <option disabled>[None]</option>
             {layerTimes}
           </Input>
 
-          <ButtonGroup>
-            <Button onClick={this.handleNDVIDiffClick}>NDVI Change</Button>
-            <Button onClick={this.handleWaterDiffClick}>Water Change</Button>
-          </ButtonGroup>
-        </Panel>
-        <Panel header="And now the weather" evenKey="3">
+          <form>
+            <Input type="radio" onChange={this.handleDiffOperationSelect} name="calc" value="none" label="View Change" defaultChecked checked />
+            <Input type="radio" onChange={this.handleDiffOperationSelect} name="calc" value="ndvi" label="NDVI Change" />
+            <Input type="radio" onChange={this.handleDiffOperationSelect} name="calc" value="ndwi" label="NDWI Change" />
+          </form>
         </Panel>
       </PanelGroup>
-    )
+    </div>)
   }
 });
 

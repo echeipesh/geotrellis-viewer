@@ -26,7 +26,7 @@ var App = React.createClass({
             onSubmit={url => this.props.actions.fetchCatalog(url)} />
           <MapViews
             rootUrl={this.props.rootUrl}
-            layers={ _.filter(this.props.catalog.layers, layer => {return layer.isLandsat}) }
+            layers={this.props.catalog.layers }
             showLayer={this.props.actions.showLayer}
             showLayerWithBreaks={this.props.actions.showLayerWithBreaks} />
         </div>

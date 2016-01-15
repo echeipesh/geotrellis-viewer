@@ -8,7 +8,6 @@ var actions = {
       url: url
     }
   },
-
   loadCatalogRequest: function(url) {
     return {
       type: 'LOAD_CATALOG_REQEST',
@@ -49,9 +48,9 @@ var actions = {
       return fetch(breaksUrl)
         .then(
           response => {
-            response.blob().then( breaks =>
-              dispatch(showLayer(layerUrl + "&breaks=" + breaks))
-            )
+            response.json().then( breaks => {
+              dispatch(actions.showLayer(layerUrl + "&breaks=" + breaks.join(",")))
+            })
           },
           error => {}
         )
