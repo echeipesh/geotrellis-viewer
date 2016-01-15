@@ -22,12 +22,13 @@ var App = React.createClass({
 
         <div className="col-md-3">
           <Catalog
-            rootUrl={this.props.rootUrl}
-            fetch={this.props.actions.fetchCatalog} />
+            defaultUrl={this.props.rootUrl}
+            onSubmit={url => this.props.actions.fetchCatalog(url)} />
           <MapViews
             rootUrl={this.props.rootUrl}
             layers={ _.filter(this.props.catalog.layers, layer => {return layer.isLandsat}) }
-            showLayer={this.props.actions.showLayer} />
+            showLayer={this.props.actions.showLayer}
+            showLayerWithBreaks={this.props.actions.showLayerWithBreaks} />
         </div>
 
       </div>
