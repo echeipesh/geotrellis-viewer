@@ -4,7 +4,6 @@ var reducer = function (state, action) {
       return Object.assign({}, state, {
         map: {
           url: [action.url],
-          bounds: [action.bounds]
         }
       });
 
@@ -13,6 +12,9 @@ var reducer = function (state, action) {
         rootUrl: action.url,
         catalog: action.catalog
       })
+    }
+    case 'SHOW_BOUNDS': {
+      return _.merge({}, state, { map: { bounds: action.bounds } })
     }
     default:
       return state;

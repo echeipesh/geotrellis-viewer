@@ -3,10 +3,6 @@ import React from 'react'
 import _ from 'lodash'
 import { PanelGroup, Panel, Input, Button, ButtonGroup } from 'react-bootstrap'
 
-function extent2bounds(extent) {
-  return [ [extent[0][1], extent[0][0]], [extent[1][1], extent[1][0]] ]
-}
-
 var MapViews = React.createClass({
   getInitialState: function () {
     return {
@@ -33,6 +29,7 @@ var MapViews = React.createClass({
     })
     this.setState(newState)
     this.updateMap(newState)
+    this.props.showExtent(this.props.layers[layer].extent)
   },
   handleTimeSelect: function(target, ev) {
     let timeId = +ev.target.value
@@ -69,14 +66,13 @@ var MapViews = React.createClass({
   },
   updateMap: function (state) {
     let [layer, time1, time2] = this.selection(state)
-    console.log("EXTENT", layer.extent)
+
     // Single Band Calculation
     if (state.activePane == 1 && ! _.isEmpty(layer) && ! _.isEmpty(time1) ) {
       let op = (state.bandOp != "none") ?  `&operation=${state.bandOp}` : ""
       this.props.showLayerWithBreaks(
         `${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?time=${time1}${op}`,
-        `${this.props.rootUrl}/tiles/breaks/${layer.name}?time=${time1}${op}`,
-        extent2bounds(layer.extent)
+        `${this.props.rootUrl}/tiles/breaks/${layer.name}?time=${time1}${op}`
       )
 
     // Difference Calculation
@@ -84,8 +80,7 @@ var MapViews = React.createClass({
       let op = (state.diffOp != "none") ?  `&operation=${state.diffOp}` : ""
       this.props.showLayerWithBreaks(
         `${this.props.rootUrl}/diff/${layer.name}/{z}/{x}/{y}?time1=${time1}&time2=${time2}${op}`,
-        `${this.props.rootUrl}/diff/breaks/${layer.name}?time1=${time1}&time2=${time2}${op}`,
-        extent2bounds(layer.extent)
+        `${this.props.rootUrl}/diff/breaks/${layer.name}?time1=${time1}&time2=${time2}${op}`
       )
     }
   },
@@ -115,16 +110,19 @@ var MapViews = React.createClass({
       <PanelGroup defaultActiveKey="1" accordion onSelect={this.handlePaneSelect}>
         <Panel header="Single Layer" eventKey="1">
           <Input type="select" label="Time" placeholder="select" value={this.state.time1}
-            onChange={ev => this.handleTimeSelect("time1", ev)}>
+              onChange={ev => this.handleTimeSelect("time1", ev)}>
             <option disabled>[None]</option>
             {layerTimes}
           </Input>
-          <form>
-            <Input type="radio" onChange={this.handleBandOperationSelect} name="calc" value="none" label="View" defaultChecked />
-            <Input type="radio" onChange={this.handleBandOperationSelect} name="calc" value="ndvi" label="NDVI" />
-            <Input type="radio" onChange={this.handleBandOperationSelect} name="calc" value="ndwi" label="NDWI" />
-          </form>
+
+          <Input type="select" label="Operation" placeholder="select" defaultValue="none" value={this.state.bandOp}
+              onChange={this.handleBandOperationSelect}>
+            <option value="none">View</option>
+            <option value="ndvi">NDVI</option>
+            <option value="ndwi">NDWI</option>
+          </Input>
         </Panel>
+
         <Panel header="Layer Change Detection" eventKey="2">
           <Input type="select" label="Time 1" placeholder="select" value={this.state.time1}
             onChange={ev => this.handleTimeSelect("time1", ev)}>
@@ -138,11 +136,12 @@ var MapViews = React.createClass({
             {layerTimes}
           </Input>
 
-          <form>
-            <Input type="radio" onChange={this.handleDiffOperationSelect} name="calc" value="none" label="View Change" defaultChecked checked />
-            <Input type="radio" onChange={this.handleDiffOperationSelect} name="calc" value="ndvi" label="NDVI Change" />
-            <Input type="radio" onChange={this.handleDiffOperationSelect} name="calc" value="ndwi" label="NDWI Change" />
-          </form>
+          <Input type="select" label="Operation" placeholder="select" defaultValue="none" value={this.state.diffOp}
+              onChange={this.handleDiffOperationSelect}>
+            <option value="none">View</option>
+            <option value="ndvi">NDVI Change</option>
+            <option value="ndwi">NDWI Change</option>
+          </Input>
         </Panel>
       </PanelGroup>
     </div>)

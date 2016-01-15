@@ -2,12 +2,20 @@ import fetch from 'isomorphic-fetch'
 
 var actions = {
 
-  showLayer: function (url, bounds) {
+  showLayer: function (url) {
     return {
       type: 'SHOW_LAYER',
-      url: url,
+      url: url
+    }
+  },
+  showBounds: function(bounds){
+    return {
+      type: 'SHOW_BOUNDS',
       bounds: bounds
     }
+  },
+  showExtent: function(extent) {
+    return actions.showBounds([ [extent[0][1], extent[0][0]], [extent[1][1], extent[1][0]] ])
   },
   loadCatalogRequest: function(url) {
     return {
@@ -44,13 +52,13 @@ var actions = {
         )
     }
   },
-  showLayerWithBreaks: function(layerUrl, breaksUrl, bounds) {
+  showLayerWithBreaks: function(layerUrl, breaksUrl) {
     return dispatch => {
       return fetch(breaksUrl)
         .then(
           response => {
             response.json().then( breaks => {
-              dispatch(actions.showLayer(layerUrl + "&breaks=" + breaks.join(","),  bounds))
+              dispatch(actions.showLayer(layerUrl + "&breaks=" + breaks.join(",")))
             })
           },
           error => {}

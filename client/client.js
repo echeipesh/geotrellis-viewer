@@ -7,7 +7,8 @@ var initialState = {
   rootUrl: "http://localhost:8088",
 
   map: {
-    url: []
+    url: [],
+    bounds: [[36.56260003738548,-123.53027343749999],[38.22091976683121,-120.58593749999999]] // California
   },
 
   catalog: {
