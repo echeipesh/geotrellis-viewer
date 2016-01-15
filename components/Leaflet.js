@@ -11,10 +11,9 @@ var Leaflet = React.createClass({
     let mapLayers = _.map(this.props.url, u => {
       return <TileLayer url={u} />
     })
-    var bounds = _.get(this.props, "bounds", [[40.712, -74.227],[40.774, -74.125]])
 
     return (
-      <Map zoom={8} style={style} maxZoom={12} bounds={bounds}>
+      <Map center ={[37.062,-121.530]} zoom={8} style={style} maxZoom={12} bounds={this.props.bounds}>
         <TileLayer
           url="http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
         />

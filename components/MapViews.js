@@ -107,7 +107,7 @@ var MapViews = React.createClass({
           {layerOptions}
         </Input>
       </Panel>
-      <PanelGroup defaultActiveKey="1" accordion onSelect={this.handlePaneSelect}>
+      <PanelGroup defaultActiveKey="1" accordion={true} onSelect={this.handlePaneSelect}>
         <Panel header="Single Layer" eventKey="1">
           <Input type="select" label="Time" placeholder="select" value={this.state.time1}
               onChange={ev => this.handleTimeSelect("time1", ev)}>
