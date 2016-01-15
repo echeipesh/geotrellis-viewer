@@ -12,8 +12,14 @@ var MapViews = React.createClass({
       layer: undefined, //layer index
       time1: undefined, //time1 index in layer
       time2: undefined, //time2 index in layer
-      times: {} // maps from layerId => {timeId1 , timeId2}
+      times: {}, // maps from layerId => {timeId1 , timeId2}
+      autoZoom: true
     }
+  },
+  handleAutoZoom: function(e) {
+    let v = e.target.checked || false
+    this.setState(_.merge({}, this.state, {autoZoom: v}))
+    if (v) this.props.showExtent(this.props.layers[this.state.layer].extent)
   },
   handlePaneSelect: function(id) {
     let newState = _.merge({}, this.state, { activePane: id })
@@ -29,7 +35,7 @@ var MapViews = React.createClass({
     })
     this.setState(newState)
     this.updateMap(newState)
-    this.props.showExtent(this.props.layers[layer].extent)
+    if (this.state.autoZoom) this.props.showExtent(this.props.layers[layer].extent)
   },
   handleTimeSelect: function(target, ev) {
     let timeId = +ev.target.value
@@ -106,6 +112,7 @@ var MapViews = React.createClass({
           <option disabled>[None]</option>
           {layerOptions}
         </Input>
+        <Input type="checkbox" label="Snap to layer extent" checked={this.state.autoZoom} onChange={this.handleAutoZoom} />
       </Panel>
       <PanelGroup defaultActiveKey="1" accordion={true} onSelect={this.handlePaneSelect}>
         <Panel header="Single Layer" eventKey="1">
