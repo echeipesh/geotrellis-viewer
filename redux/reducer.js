@@ -3,7 +3,8 @@ var reducer = function (state, action) {
     case 'SHOW_LAYER':
       return Object.assign({}, state, {
         map: {
-          url: [action.url]
+          url: [action.url],
+          bounds: [action.bounds]
         }
       });
 

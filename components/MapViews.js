@@ -3,6 +3,9 @@ import React from 'react'
 import _ from 'lodash'
 import { PanelGroup, Panel, Input, Button, ButtonGroup } from 'react-bootstrap'
 
+function extent2bounds(extent) {
+  return [ [extent[0][1], extent[0][0]], [extent[1][1], extent[1][0]] ]
+}
 
 var MapViews = React.createClass({
   getInitialState: function () {
@@ -66,13 +69,14 @@ var MapViews = React.createClass({
   },
   updateMap: function (state) {
     let [layer, time1, time2] = this.selection(state)
-
+    console.log("EXTENT", layer.extent)
     // Single Band Calculation
     if (state.activePane == 1 && ! _.isEmpty(layer) && ! _.isEmpty(time1) ) {
       let op = (state.bandOp != "none") ?  `&operation=${state.bandOp}` : ""
       this.props.showLayerWithBreaks(
         `${this.props.rootUrl}/tiles/${layer.name}/{z}/{x}/{y}?time=${time1}${op}`,
-        `${this.props.rootUrl}/tiles/breaks/${layer.name}?time=${time1}${op}`
+        `${this.props.rootUrl}/tiles/breaks/${layer.name}?time=${time1}${op}`,
+        extent2bounds(layer.extent)
       )
 
     // Difference Calculation
@@ -80,7 +84,8 @@ var MapViews = React.createClass({
       let op = (state.diffOp != "none") ?  `&operation=${state.diffOp}` : ""
       this.props.showLayerWithBreaks(
         `${this.props.rootUrl}/diff/${layer.name}/{z}/{x}/{y}?time1=${time1}&time2=${time2}${op}`,
-        `${this.props.rootUrl}/diff/breaks/${layer.name}?time1=${time1}&time2=${time2}${op}`
+        `${this.props.rootUrl}/diff/breaks/${layer.name}?time1=${time1}&time2=${time2}${op}`,
+        extent2bounds(layer.extent)
       )
     }
   },

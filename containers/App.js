@@ -17,7 +17,7 @@ var App = React.createClass({
       <div className="row">
 
         <div className="col-md-9">
-          <Leaflet url={this.props.map.url} />
+          <Leaflet url={this.props.map.url} bounds={this.props.map.bounds} />
         </div>
 
         <div className="col-md-3">
