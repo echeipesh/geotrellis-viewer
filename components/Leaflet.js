@@ -13,7 +13,7 @@ var Leaflet = React.createClass({
     })
 
     return (
-      <Map center ={[37.062,-121.530]} zoom={8} style={style} maxZoom={12} bounds={this.props.bounds}>
+      <Map center ={[37.062,-121.530]} zoom={8} style={style} bounds={this.props.bounds}>
         <TileLayer
           url="http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
         />
