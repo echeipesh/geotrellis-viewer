@@ -67,6 +67,7 @@ var actions = {
 
   showLayerWithBreaks: function(layerUrl, breaksUrl) {
     return dispatch => {
+      console.log("Fetching breaks", breaksUrl)
       return fetch(breaksUrl)
         .then(
           response => {
