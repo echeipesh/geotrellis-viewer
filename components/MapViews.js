@@ -1,31 +1,32 @@
 "use strict";
-import React from 'react'
-import _ from 'lodash'
-import { PanelGroup, Panel, Input, Button, ButtonGroup } from 'react-bootstrap'
+import React from 'react';
+import _ from 'lodash';
+import { PanelGroup, Panel, Input, Button, ButtonGroup } from 'react-bootstrap';
 
 function updateMap (root, op, layer, t1, t2) { //v = {root, op, layer, time1, time2}
   return showLayerWithBreaks => {
     // console.log("Update Map", root, op, layer, t1, t2, (layer && t1) ? "pass" : "fail")
     if ( ! _.isUndefined(layer) && ! _.isUndefined(t1) && ! _.isUndefined(t2) ) {
       // Difference Calculation
-      let time1 = layer.times[t1]
-      let opc = ((op != "none") && layer.isLandsat) ?  `&operation=${op}` : ""
+      let time1 = layer.times[t1];
+      let time2 = layer.times[t2];
+      let opc = ((op != "none") && layer.isLandsat) ?  `&operation=${op}` : "";
       showLayerWithBreaks(
         `${root}/diff/${layer.name}/{z}/{x}/{y}?time1=${time1}&time2=${time2}${opc}`,
         `${root}/diff/breaks/${layer.name}?time1=${time1}&time2=${time2}${opc}`
-      )
+      );
     } else if (! _.isUndefined(layer) && ! _.isUndefined(t1) ) {
-      console.log("yes")
+      //console.log("yes");
       // Single Band Calculation
-      let time1 = layer.times[t1]
-      let time2 = layer.times[t2]
-      let opc = ((op != "none") && layer.isLandsat) ?  `&operation=${op}` : ""
+      let time1 = layer.times[t1];
+      let time2 = layer.times[t2];
+      let opc = ((op != "none") && layer.isLandsat) ?  `&operation=${op}` : "";
       showLayerWithBreaks(
         `${root}/tiles/${layer.name}/{z}/{x}/{y}?time=${time1}${opc}`,
         `${root}/tiles/breaks/${layer.name}?time=${time1}${opc}`
-      )
+      );
     }
-  }
+  };
 }
 
 var MapViews = React.createClass({
@@ -39,20 +40,21 @@ var MapViews = React.createClass({
       time2: undefined, //time2 index in layer
       times: {}, // maps from layerId => {timeId1 , timeId2}
       autoZoom: true
-    }
+    };
   },
   handleAutoZoom: function(e) {
-    let v = e.target.checked || false
-    this.setState(_.merge({}, this.state, {autoZoom: v}))
-    if (v) this.props.showExtent(this.props.layers[this.state.layer].extent)
+    let v = e.target.checked || false;
+    this.setState(_.merge({}, this.state, {autoZoom: v}));
+    if (v) this.props.showExtent(this.props.layers[this.state.layer].extent);
   },
   handlePaneSelect: function(id) {
-    let newState = _.merge({}, this.state, { activePane: id })
-    this.setState(newState)
-    this.updateMap(newState)
+    console.log("PANE SELECT %s", id);
+    let newState = _.merge({}, this.state, { activePane: id });
+    this.setState(newState);
+    this.updateMap(newState);
   },
   handleLayerSelect: function(ev) {
-    let layer = +ev.target.value
+    let layer = +ev.target.value;
 
     let newState = _.merge({}, this.state, {
       "layer": layer,
@@ -64,42 +66,44 @@ var MapViews = React.createClass({
           "time2": this.state.time2
         }
       }
-    })
+    });
 
-    this.setState(newState)
-    this.updateMap(newState)
-    if (this.state.autoZoom) this.props.showExtent(this.props.layers[layer].extent)
+    this.setState(newState);
+    this.updateMap(newState);
+    if (this.state.autoZoom) this.props.showExtent(this.props.layers[layer].extent);
   },
+
   handleTimeSelect: function(target, ev) {
-    let newState = _.merge({}, this.state, { [target]: +ev.target.value })
-    this.setState(newState)
-    this.updateMap(newState)
+    let newState = _.merge({}, this.state, { [target]: +ev.target.value });
+    this.setState(newState);
+    this.updateMap(newState);
   },
   handleBandOperationSelect: function(ev) {
-    let newState = _.merge({}, this.state, { bandOp: ev.target.value })
-    this.setState(newState)
-    this.updateMap(newState)
+    let newState = _.merge({}, this.state, { bandOp: ev.target.value });
+    this.setState(newState);
+    this.updateMap(newState);
   },
   handleDiffOperationSelect: function(ev) {
-    let newState = _.merge({}, this.state, { diffOp: ev.target.value })
-    this.setState(newState)
-    this.updateMap(newState)
+    let newState = _.merge({}, this.state, { diffOp: ev.target.value });
+    this.setState(newState);
+    this.updateMap(newState);
   },
   selection: function (state) {
-    var layer, time1, time2
+    var layer, time1, time2;
     if (state.layer != undefined && ! _.isEmpty(this.props.layers)) {
-      layer = this.props.layers[state.layer]
-      time1 = layer.times[state.time1]
-      time2 = layer.times[state.time2]
+      layer = this.props.layers[state.layer];
+      time1 = layer.times[state.time1];
+      time2 = layer.times[state.time2];
     }
-    return [layer, time1, time2]
+    return [layer, time1, time2];
   },
   updateMap: function (state) {
-    let [layer, time1, time2] = this.selection(state)
-    if (this.state.activePane == 1){
-      updateMap(this.props.rootUrl, state.bandOp, layer, state.time1)(this.props.showLayerWithBreaks)
+    let [layer, time1, time2] = this.selection(state);
+    console.log("ACTIVE PANE: %s", state.activePane);
+    if (state.activePane == 1){
+      updateMap(this.props.rootUrl, state.bandOp, layer, state.time1)(this.props.showLayerWithBreaks);
     } else {
-      updateMap(this.props.rootUrl, state.diffOp, layer, state.time1, state.time2)(this.props.showLayerWithBreaks)
+      updateMap(this.props.rootUrl, state.diffOp, layer, state.time1, state.time2)(this.props.showLayerWithBreaks);
     }
   },
   componentWillReceiveProps: function (nextProps){
@@ -108,30 +112,30 @@ var MapViews = React.createClass({
     if ( _.isUndefined(this.state.layer) && ! _.isEmpty(nextProps.layers)) {
 
       // we are blank and now is our chance to choose a layer and some times
-      let newState = _.merge({}, this.state, { layer: 0, time1: 0, time2: 1 })
-      this.setState(newState)
-      var layer = nextProps.layers[0]
+      let newState = _.merge({}, this.state, { layer: 0, time1: 0, time2: 1 });
+      this.setState(newState);
+      var layer = nextProps.layers[0];
 
       if (this.state.activePane == 1){
-        updateMap(nextProps.rootUrl, this.state.bandOp, layer, 0)(nextProps.showLayerWithBreaks)
+        updateMap(nextProps.rootUrl, this.state.bandOp, layer, 0)(nextProps.showLayerWithBreaks);
       } else {
-        updateMap(nextProps.rootUrl, this.state.diffOp, layer, 0, 1)(nextProps.showLayerWithBreaks)
+        updateMap(nextProps.rootUrl, this.state.diffOp, layer, 0, 1)(nextProps.showLayerWithBreaks);
       }
-      nextProps.showExtent(layer.extent)
+      nextProps.showExtent(layer.extent);
     }
   },
   render: function() {
-    let [layer, time1, time2] = this.selection(this.state)
-    let isLandsat = _.get(layer, "isLandsat", false)
+    let [layer, time1, time2] = this.selection(this.state);
+    let isLandsat = _.get(layer, "isLandsat", false);
 
     let layerOptions =
       _.map(this.props.layers, (layer, index) => {
-        return <option value={index} key={index}>{layer.name}</option>
+        return <option value={index} key={index}>{layer.name}</option>;
       });
 
     let layerTimes =
       _.map(_.get(layer, "times", []), (time, index) => {
-        return <option value={index} key={index}>{time}</option>
+        return <option value={index} key={index}>{time}</option>;
       });
 
     return (<div>
@@ -144,7 +148,7 @@ var MapViews = React.createClass({
         <Input type="checkbox" label="Snap to layer extent" checked={this.state.autoZoom} onChange={this.handleAutoZoom} />
       </Panel>
       <PanelGroup defaultActiveKey="1" accordion={true} onSelect={this.handlePaneSelect}>
-        <Panel header="Single Layer" eventKey="1">
+        <Panel header="Single Layer" eventKey="1" id={1}>
           <Input type="select" label="Time" placeholder="select" value={this.state.time1}
               onChange={ev => this.handleTimeSelect("time1", ev)}>
             <option disabled>[None]</option>
@@ -161,7 +165,7 @@ var MapViews = React.createClass({
           </Input>
         </Panel>
 
-        <Panel header="Layer Change Detection" eventKey="2">
+        <Panel header="Layer Change Detection" eventKey="2" id={2}>
           <Input type="select" label="Time 1" placeholder="select" value={this.state.time1}
             onChange={ev => this.handleTimeSelect("time1", ev)}>
             <option disabled>[None]</option>
@@ -169,8 +173,8 @@ var MapViews = React.createClass({
           </Input>
 
           <Input type="select" label="Time 2" placeholder="select" value={this.state.time2}
-            onChange={ev => this.handleTimeSelect("time2", ev)}>
-            <option disabled>[None]</option>
+            onChange={ev => this.handleTimeSelect("time2", ev) }>
+            <option disabled>[None]</option>;
             {layerTimes}
           </Input>
 
