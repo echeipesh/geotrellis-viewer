@@ -8,7 +8,7 @@ var initialState = {
 
   map: {
     url: [],
-    bounds: [[36.56260003738548,-123.53027343749999],[38.22091976683121,-120.58593749999999]] // California
+    bounds: undefined
   },
 
   catalog: {
