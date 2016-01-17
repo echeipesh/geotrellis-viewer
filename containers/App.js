@@ -19,7 +19,8 @@ var App = React.createClass({
           <Leaflet url={this.props.map.url} bounds={this.props.map.bounds} />
         </div>
 
-        <div className="col-md-3">
+        <div className="col-md-3" >
+          <div style={{"paddingRight": "10px", "paddingTop": "10px"}}>
           <Catalog
             defaultUrl={this.props.rootUrl}
             bounds={this.props.map.bounds}
@@ -30,6 +31,7 @@ var App = React.createClass({
             showExtent={this.props.actions.showExtent}
             showLayer={this.props.actions.showLayer}
             showLayerWithBreaks={this.props.actions.showLayerWithBreaks} />
+          </div>
         </div>
 
       </div>
