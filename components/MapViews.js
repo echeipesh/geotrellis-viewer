@@ -3,31 +3,46 @@ import React from 'react';
 import _ from 'lodash';
 import { PanelGroup, Panel, Input, Button, ButtonGroup } from 'react-bootstrap';
 
-function updateMap (root, op, layer, t1, t2) { //v = {root, op, layer, time1, time2}
+function updateIntraLayerDiffMap (root, op, layer, t1, t2) {
   return showLayerWithBreaks => {
-    // console.log("Update Map", root, op, layer, t1, t2, (layer && t1) ? "pass" : "fail")
-    if ( ! _.isUndefined(layer) && ! _.isUndefined(t1) && ! _.isUndefined(t2) ) {
-      // Difference Calculation
-      let time1 = layer.times[t1];
-      let time2 = layer.times[t2];
-      let opc = ((op != "none") && layer.isLandsat) ?  `&operation=${op}` : "";
-      showLayerWithBreaks(
-        `${root}/diff/${layer.name}/{z}/{x}/{y}?time1=${time1}&time2=${time2}${opc}`,
-        `${root}/diff/breaks/${layer.name}?time1=${time1}&time2=${time2}${opc}`
-      );
-    } else if (! _.isUndefined(layer) && ! _.isUndefined(t1) ) {
-      //console.log("yes");
-      // Single Band Calculation
-      let time1 = layer.times[t1];
-      let time2 = layer.times[t2];
-      let opc = ((op != "none") && layer.isLandsat) ?  `&operation=${op}` : "";
-      showLayerWithBreaks(
-        `${root}/tiles/${layer.name}/{z}/{x}/{y}?time=${time1}${opc}`,
-        `${root}/tiles/breaks/${layer.name}?time=${time1}${opc}`
-      );
+    let time1 = layer.times[t1];
+    let time2 = layer.times[t2];
+    let opc = ((op != "none") && layer.isLandsat) ?  `&operation=${op}` : "";
+    showLayerWithBreaks(
+      `${root}/diff/${layer.name}/{z}/{x}/{y}?time1=${time1}&time2=${time2}${opc}`,
+      `${root}/diff/breaks/${layer.name}?time1=${time1}&time2=${time2}${opc}`
+    );
+  }
+};
+
+function updateSingleLayerMap (root, op, layer, t1) {
+  return showLayerWithBreaks => {
+    // Single Band Calculation
+    let time1 = layer.times[t1];
+    let opc = ((op != "none") && layer.isLandsat) ?  `&operation=${op}` : "";
+    showLayerWithBreaks(
+      `${root}/tiles/${layer.name}/{z}/{x}/{y}?time=${time1}${opc}`,
+      `${root}/tiles/breaks/${layer.name}?time=${time1}${opc}`
+    );
+  }
+};
+
+/**
+ * If all the arguments given to this functio are defined it will evaluate curried function,
+ * Else it will always evaluate curried function to undefined.
+ */
+function ifAllDefined() {
+  if (! _.reduce(_.map(arguments, _.isUndefined), (a ,b) => { return a || b })){
+    return f => {
+      return f.apply(this, arguments)
     }
-  };
+  } else {
+    return f => {
+      return undefined;
+    }
+  }
 }
+
 
 var MapViews = React.createClass({
   getInitialState: function () {
@@ -100,10 +115,14 @@ var MapViews = React.createClass({
   updateMap: function (state) {
     let [layer, time1, time2] = this.selection(state);
     console.log("ACTIVE PANE: %s", state.activePane);
-    if (state.activePane == 1){
-      updateMap(this.props.rootUrl, state.bandOp, layer, state.time1)(this.props.showLayerWithBreaks);
-    } else {
-      updateMap(this.props.rootUrl, state.diffOp, layer, state.time1, state.time2)(this.props.showLayerWithBreaks);
+
+    switch (+state.activePane) {
+      case 1:
+        ifAllDefined(this.props.rootUrl, state.bandOp, layer, state.time1)(updateSingleLayerMap)(this.props.showLayerWithBreaks);
+        break;
+      case 2:
+        ifAllDefined(this.props.rootUrl, state.diffOp, layer, state.time1, state.time2)(updateIntraLayerDiffMap)(this.props.showLayerWithBreaks);
+        break;
     }
   },
   componentWillReceiveProps: function (nextProps){
@@ -115,12 +134,8 @@ var MapViews = React.createClass({
       let newState = _.merge({}, this.state, { layer: 0, time1: 0, time2: 1 });
       this.setState(newState);
       var layer = nextProps.layers[0];
-
-      if (this.state.activePane == 1){
-        updateMap(nextProps.rootUrl, this.state.bandOp, layer, 0)(nextProps.showLayerWithBreaks);
-      } else {
-        updateMap(nextProps.rootUrl, this.state.diffOp, layer, 0, 1)(nextProps.showLayerWithBreaks);
-      }
+      // assume we can start with Single layer map
+      updateSingleLayerMap(nextProps.rootUrl, this.state.bandOp, layer, 0)(nextProps.showLayerWithBreaks);
       nextProps.showExtent(layer.extent);
     }
   },
