@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import * as actions from '../redux/actions';
 import Leaflet from '../components/Leaflet';
 import Catalog from '../components/Catalog';
-import MapViews from '../components/MapViews';
+import Panels from '../components/Panels';
 import _ from 'lodash';
 
 import "bootstrap-webpack";
@@ -25,7 +25,7 @@ var App = React.createClass({
             defaultUrl={this.props.rootUrl}
             bounds={this.props.map.bounds}
             onSubmit={url => this.props.actions.fetchCatalog(url)} />
-          <MapViews
+          <Panels
             rootUrl={this.props.rootUrl}
             layers={this.props.catalog.layers }
             showExtent={this.props.actions.showExtent}

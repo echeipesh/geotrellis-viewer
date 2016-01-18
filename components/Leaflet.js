@@ -9,7 +9,7 @@ var Leaflet = React.createClass({
       minHeight: "800px", width: "100%"
     };
     let mapLayers = _.map(this.props.url, u => {
-      return <TileLayer url={u} />;
+      return <TileLayer key={1} url={u} />;
     });
 
     return (
